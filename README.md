@@ -31,7 +31,7 @@ A collection of macros for analyzing and filtering time series data quality. The
 
 **Usage:**
 ```sql
-SELECT * FROM compute_timeseries_quality_metrics(timeseries_tbl, {'product_id': product_id, 'store_id': store_id}, date_column, sales_value);
+SELECT * FROM compute_timeseries_quality_metrics(timeseries_tbl, {'product_id': product_id, 'store_id': store_id}, date_column, sales_value, 'day');
 ```
 
 **Parameters:**
@@ -39,6 +39,7 @@ SELECT * FROM compute_timeseries_quality_metrics(timeseries_tbl, {'product_id': 
 - **hierarchy_cols**: Struct of column names and values that define the time series grouping
 - **time_col**: Date/timestamp column for the time series
 - **target_col**: The metric column to analyze
+- **freq**: Frequency of the time series (string). Valid values are, e.g. 'day', 'week', 'month', 'quarter', 'year' (see [DuckDB Date Functions](https://duckdb.org/docs/sql/functions/datepart.html)).
 
 **Output Metrics:**
 - **sum**: Total sum of the target variable

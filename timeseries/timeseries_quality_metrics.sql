@@ -1,9 +1,16 @@
-CREATE OR REPLACE MACRO compute_timeseries_quality_metrics(tbl_name, hierarchy_cols, time_col, target_col) AS TABLE
+-- Macro that computes quality metrics for time series data.
+-- Inputs:
+-- - timeseries_table: Name of the table or subquery to analyze (string). The table must be ordered by hierarchy_cols and time_col.
+-- - hierarchy_cols: Struct of column names and values that define the time series grouping
+-- - time_col: Date/timestamp column for the time series
+-- - target_col: The metric column to analyze
+-- - freq: Frequency of the time series (string). Valid values are 'days', 'weeks', 'months', 'quarters', 'years' (see https://duckdb.org/docs/sql/functions/datepart.html).
+CREATE OR REPLACE MACRO compute_timeseries_quality_metrics(timeseries_table, hierarchy_cols, time_col, target_col, freq) AS TABLE
 WITH zeros_marked AS (
     SELECT 
         *,
         CASE WHEN target_col = 0 THEN 1 ELSE 0 END as is_zero
-    FROM QUERY_TABLE(tbl_name)
+    FROM QUERY_TABLE(timeseries_table)
 ),
 leading_zeros_count AS (
     SELECT 
@@ -53,15 +60,15 @@ aggregated_tbl AS (
         SUM(CASE WHEN isnan(target_col) THEN 1 ELSE 0 END) / COUNT(*) AS perc_nan,
         SUM(CASE WHEN target_col IS NULL THEN 1 ELSE 0 END) AS n_null,
         SUM(CASE WHEN target_col IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS perc_null,
-        DATE_DIFF('days', MIN(time_col), MAX(time_col)) + 1 AS expected_length
-    FROM QUERY_TABLE(tbl_name)
+        DATE_DIFF(freq, MIN(time_col), MAX(time_col)) + 1 AS expected_length
+    FROM QUERY_TABLE(timeseries_table)
     GROUP BY hierarchy_cols
 ),
 aggregated_with_zeros_tbl AS (
     SELECT 
         a.*,
         (expected_length - length) AS n_gaps,
-        DATE_DIFF('days', end_date, MAX(end_date) OVER ()) AS n_gaps_to_max_date,
+        DATE_DIFF(freq, end_date, MAX(end_date) OVER ()) AS n_gaps_to_max_date,
         l.n_leading_zeros,
         e.n_ending_zeros
     FROM aggregated_tbl a
