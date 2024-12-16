@@ -21,8 +21,9 @@ This repository contains ready-to-use SQL recipes for DuckDB, making it easier t
 ### Time Series Analysis
 
 <details>
+
 #### Data Quality Statistics (`timeseries/dataquality.sql`)
-</details>
+
 
 A macro that computes comprehensive statistics for time series data, helping identify data quality issues and gaps. This macro is for daily data, please adjust the macro for other time granularities accordingly.
 
@@ -50,6 +51,8 @@ SELECT * FROM compute_stats('my_table', {'product_id': product_id, 'store_id': s
 - **expected_length**: Expected number of data points based on date range
 - **n_gaps**: Number of missing data points in the series
 - **n_gaps_to_max_date**: Number of days between series end date and the maximum end date across all series
+
+</details>
 
 ## Contributing
 
