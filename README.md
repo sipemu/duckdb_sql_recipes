@@ -29,11 +29,9 @@ This repository contains ready-to-use SQL recipes for DuckDB, making it easier t
 
 A collection of macros for analyzing and filtering time series data quality. The main macro computes comprehensive statistics, and additional utility macros help identify and handle problematic series.
 
-##### Main Quality Metrics Macro
-
 **Usage:**
 ```sql
-SELECT * FROM compute_timeseries_quality_metrics('my_table', {'product_id': product_id, 'store_id': store_id}, date_column, sales_value);
+SELECT * FROM compute_timeseries_quality_metrics(timeseries_tbl, {'product_id': product_id, 'store_id': store_id}, date_column, sales_value);
 ```
 
 **Parameters:**
@@ -66,8 +64,13 @@ SELECT * FROM compute_timeseries_quality_metrics('my_table', {'product_id': prod
 Identifies series with fewer than m values.
 
 ```sql
-SELECT * FROM count_short_series('summary_table', 30);
+SELECT * FROM count_short_series(timeseries_summary_tbl, 30);
 ```
+
+**Parameters:**
+- **summary_table**: Summary table of the time series data
+- **min_length**: Minimum length of the series
+
 **Output:**
 - **n_short_series**: Number of series with length < m
 - **perc_short_series**: Percentage of series with length < m
@@ -76,15 +79,21 @@ SELECT * FROM count_short_series('summary_table', 30);
 Removes series with fewer than m values from the dataset.
 
 ```sql
-SELECT * FROM drop_short_series('summary_table', 'original_table', 30);
+SELECT * FROM drop_short_series(timeseries_summary_tbl, timeseries_tbl, 30);
 ```
+
+**Parameters:**
+- **summary_table**: Summary table of the time series data
+- **min_length**: Minimum length of the series
 
 ###### Count Constant Series
 Identifies series with only one unique value.
 
 ```sql
-SELECT * FROM count_constant_series('summary_table');
+SELECT * FROM count_constant_series(timeseries_summary_tbl);
 ```
+**Parameters:**
+- **summary_table**: Summary table of the time series data
 **Output:**
 - **n_constant_series**: Number of constant series
 - **perc_constant_series**: Percentage of constant series
@@ -93,21 +102,24 @@ SELECT * FROM count_constant_series('summary_table');
 Removes constant series from the dataset.
 
 ```sql
-SELECT * FROM drop_constant_series('summary_table', 'original_table');
+SELECT * FROM drop_constant_series(timeseries_summary_tbl, timeseries_tbl);
 ```
+
+**Parameters:**
+- **summary_table**: Summary table of the time series data
 
 </details>
 
 <details>
-<summary>Fill Time Gaps</summary>
+<summary>Data Preparation</summary>
 
-#### Fill Time Gaps ([`timeseries/fill_time_gaps.sql`](timeseries/fill_time_gaps.sql))
+#### Fill Time Gaps ([`timeseries/data_preparation.sql`](timeseries/data_preparation.sql))
 
 A macro that fills gaps in daily time series data by generating missing timestamps and filling target values with NULL.
 
 **Usage:**
 ```sql
-SELECT * FROM fill_time_gaps('my_table', {'product_id': product_id, 'store_id': store_id}, date_column, sales_value);
+SELECT * FROM fill_time_gaps(timeseries_tbl, {'product_id': product_id, 'store_id': store_id}, date_column, sales_value);
 ```
 
 **Parameters:**
