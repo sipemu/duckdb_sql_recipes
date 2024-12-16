@@ -12,6 +12,7 @@ This repository contains ready-to-use SQL recipes for DuckDB, making it easier t
 - [Recipes](#recipes)
   - [Time Series Analysis](#time-series-analysis)
     - [Data Quality Statistics](#data-quality-statistics-timeseriesdataqualitysql)
+    - [Fill Time Gaps](#fill-time-gaps-timeseriesfill_time_gapssql)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -24,14 +25,15 @@ This repository contains ready-to-use SQL recipes for DuckDB, making it easier t
 
 <summary>Data Quality Statistics</summary>
 
-#### Data Quality Statistics (`timeseries/dataquality.sql`)
+#### Data Quality Statistics ([`timeseries/timeseries_quality_metrics.sql`](timeseries/timeseries_quality_metrics.sql))
 
+A collection of macros for analyzing and filtering time series data quality. The main macro computes comprehensive statistics, and additional utility macros help identify and handle problematic series.
 
-A macro that computes comprehensive statistics for time series data, helping identify data quality issues and gaps. This macro is for daily data, please adjust the macro for other time granularities accordingly.
+##### Main Quality Metrics Macro
 
 **Usage:**
 ```sql
-SELECT * FROM compute_stats('my_table', {'product_id': product_id, 'store_id': store_id}, date_column, sales_value);
+SELECT * FROM compute_timeseries_quality_metrics('my_table', {'product_id': product_id, 'store_id': store_id}, date_column, sales_value);
 ```
 
 **Parameters:**
@@ -44,17 +46,83 @@ SELECT * FROM compute_stats('my_table', {'product_id': product_id, 'store_id': s
 - **sum**: Total sum of the target variable
 - **avg**: Average value
 - **std**: Standard deviation
+- **unique_values**: Number of distinct values in the target column
 - **length**: Number of actual data points
 - **start_date**: First date in the series
 - **end_date**: Last date in the series
 - **n_zeros**: Count of zero values
+- **perc_zeros**: Percentage of zero values
 - **n_nan**: Count of NaN values
+- **perc_nan**: Percentage of NaN values
 - **n_null**: Count of NULL values
+- **perc_null**: Percentage of NULL values
 - **expected_length**: Expected number of data points based on date range
 - **n_gaps**: Number of missing data points in the series
 - **n_gaps_to_max_date**: Number of days between series end date and the maximum end date across all series
 
+##### Utility Macros
+
+###### Count Short Series
+Identifies series with fewer than m values.
+
+```sql
+SELECT * FROM count_short_series('summary_table', 30);
+```
+**Output:**
+- **n_short_series**: Number of series with length < m
+- **perc_short_series**: Percentage of series with length < m
+
+###### Drop Short Series
+Removes series with fewer than m values from the dataset.
+
+```sql
+SELECT * FROM drop_short_series('summary_table', 'original_table', 30);
+```
+
+###### Count Constant Series
+Identifies series with only one unique value.
+
+```sql
+SELECT * FROM count_constant_series('summary_table');
+```
+**Output:**
+- **n_constant_series**: Number of constant series
+- **perc_constant_series**: Percentage of constant series
+
+###### Drop Constant Series
+Removes constant series from the dataset.
+
+```sql
+SELECT * FROM drop_constant_series('summary_table', 'original_table');
+```
+
 </details>
+
+<details>
+<summary>Fill Time Gaps</summary>
+
+#### Fill Time Gaps ([`timeseries/fill_time_gaps.sql`](timeseries/fill_time_gaps.sql))
+
+A macro that fills gaps in daily time series data by generating missing timestamps and filling target values with NULL.
+
+**Usage:**
+```sql
+SELECT * FROM fill_time_gaps('my_table', {'product_id': product_id, 'store_id': store_id}, date_column, sales_value);
+```
+
+**Parameters:**
+- **tbl_name**: Name of the table or subquery to process (string)
+- **hierarchy_cols**: Struct of column names and values that define the time series grouping
+- **time_col**: Date/timestamp column for the time series
+- **target_col**: The metric column to fill with NULL for missing dates
+
+**Output:**
+- Returns the original data with additional rows for missing dates
+- Missing values are filled with NULL
+- Results are ordered by hierarchy columns and date
+
+</details>
+
 
 ## Contributing
 
