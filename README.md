@@ -20,7 +20,9 @@ This repository contains ready-to-use SQL recipes for DuckDB, making it easier t
 
 ### Time Series Analysis
 
+<details>
 #### Data Quality Statistics (`timeseries/dataquality.sql`)
+</details>
 
 A macro that computes comprehensive statistics for time series data, helping identify data quality issues and gaps. This macro is for daily data, please adjust the macro for other time granularities accordingly.
 
