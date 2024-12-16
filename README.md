@@ -22,6 +22,8 @@ This repository contains ready-to-use SQL recipes for DuckDB, making it easier t
 
 <details>
 
+<summary>Data Quality Statistics</summary>
+
 #### Data Quality Statistics (`timeseries/dataquality.sql`)
 
 
